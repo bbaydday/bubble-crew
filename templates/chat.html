@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat Room</title>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+  <h2>Room: {{ room }} | User: {{ username }}</h2>
+  <ul id="messages" style="max-height: 400px; overflow-y: auto;"></ul>
+  <input id="messageInput" placeholder="Type message...">
+  <button id="emoji-button">😊</button>
+  <button onclick="sendMessage()">Send</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
+  <script>
+    const socket = io();
+    const username = "{{ username }}";
+    const room = "{{ room }}";
+
+    const input = document.getElementById('messageInput');
+    const messages = document.getElementById('messages');
+
+    socket.emit('join', { username, room });
+
+    socket.on('message', function(msg) {
+      const item = document.createElement('li');
+      item.textContent = msg;
+      messages.appendChild(item);
+      messages.scrollTop = messages.scrollHeight;
+    });
+
+    function sendMessage() {
+      if (input.value.trim() !== '') {
+        socket.emit('message', { msg: input.value });
+        input.value = '';
+      }
+    }
+
+    // Emoji Picker
+    const picker = new EmojiButton();
+    const button = document.querySelector('#emoji-button');
+
+    picker.on('emoji', emoji => {
+      input.value += emoji;
+    });
+
+    button.addEventListener('click', () => {
+      picker.togglePicker(button);
+    });
+  </script>
+</body>
+</html>
